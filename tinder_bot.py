@@ -1,8 +1,9 @@
 import requests
 from selenium import webdriver
 from time import sleep
-from random import random, randrange
-
+import random
+import string
+from random import randrange
 from secrets import username, password
 
 
@@ -10,10 +11,17 @@ class TinderBot():
     def __init__(self):
         self.driver = webdriver.Chrome()
 
+    def cookies(self):
+        ck_btn = self.driver.find_element_by_xpath(
+            '//*[@id="content"]/div/div[2]/div/div/div[1]/button')
+        ck_btn.click()
+
     def login(self):
         self.driver.get('https://tinder.com')
 
         sleep(4)
+        self.cookies()
+        sleep(2)
 
         fb_btn = self.driver.find_element_by_xpath(
             '//*[@id="modal-manager"]/div/div/div[1]/div/div[3]/span/div[2]/button'
@@ -56,19 +64,39 @@ class TinderBot():
         )
         dislike_btn.click()
 
-    def auto_swipe(self):
+    def get_random_string(self):
+        result = ''.join(random.choice(string.ascii_uppercase) for x in range(10))
+        print(result)
+        return result
 
+    def take_screenshot(self):
+        filename = self.get_random_string() + '.png'
+        image = self.driver.find_element_by_xpath(
+            '//*[@id="content"]/div/div[1]/div/main/div[1]/div/div/div[1]/div/div[1]/div[3]/div[1]/div/span/div')
+        image_url = image.value_of_css_property("background-image")
+        raw_url = image_url.replace('url("', '').replace('")', '')
+        # get webp
+        # convert webp --> png
+        resp = requests.get(raw_url)
+        im = Image.open(BytesIO(resp.content)).convert("RGB")
+        im.save(filename, "png")
+
+    def auto_swipe(self):
+        irand = randrange(2, 5)
         left, right = 0, 0
         while True:
             sleep(1)
             try:
-                rand = random()
-                if rand > .7:
+                rand = random.uniform(0, 1)
+                if rand > .1:
+                    sleep(irand)
                     self.like()
+                    self.take_screenshot()
                     right += 1
                     print('{}th right swipe'.format(right))
                 else:
                     self.dislike()
+                    sleep(irand)
                     left += 1
                     print('{}th left swipe'.format(left))
             except Exception:
@@ -97,7 +125,7 @@ class TinderBot():
 
             matches[1].click()
             msg_box = self.driver.find_element_by_class_name('sendMessageForm__input')
-            rand = random()
+            rand = random.uniform(0, 1)
 
             msg_box.send_keys('hola') if rand > .5 else msg_box.send_keys('hello (:')
             send_btn = self.driver.find_element_by_xpath(
@@ -112,21 +140,7 @@ class TinderBot():
             sleep(irand)
 
 
-    # def take_screenshot(self):
-    #     filename = self.randomString() + '.png'
-    #     image = self.driver.find_element_by_xpath(
-    #         '//*[@id="content"]/div/div[1]/div/main/div[1]/div/div/div[1]/div/div[1]/div[3]/div[1]/div[1]/div/div[1]/div/div')
-    #     image_url = image.value_of_css_property("background-image")
-    #     raw_url = image_url.replace('url("', '').replace('")', '')
-    #     # get webp
-    #     # convert webp --> png
-    #     resp = requests.get(raw_url)
-    #     im = Image.open(BytesIO(resp.content)).convert("RGB")
-    #     im.save(filename, "png")
-
-
 bot = TinderBot()
 bot.login()
 bot.auto_swipe()
 # bot.message_all()
-# bot.take_screenshot()

@@ -5,6 +5,9 @@ import random
 import string
 from random import randrange
 from secrets import username, password
+from PIL import Image
+import requests
+from io import BytesIO
 
 
 class TinderBot():
@@ -56,6 +59,7 @@ class TinderBot():
         like_btn = self.driver.find_element_by_xpath(
             '//*[@id="content"]/div/div[1]/div/main/div[1]/div/div/div[1]/div/div[2]/div[4]/button'
         )
+        self.train_image_save()
         like_btn.click()
 
     def dislike(self):
@@ -66,20 +70,29 @@ class TinderBot():
 
     def get_random_string(self):
         result = ''.join(random.choice(string.ascii_uppercase) for x in range(10))
-        print(result)
         return result
 
     def take_screenshot(self):
         filename = self.get_random_string() + '.png'
         image = self.driver.find_element_by_xpath(
-            '//*[@id="content"]/div/div[1]/div/main/div[1]/div/div/div[1]/div/div[1]/div[3]/div[1]/div/span/div')
+            '//*[@id="content"]/div/div[1]/div/main/div[1]/div/div/div[1]/div/div[1]/div[3]/div[1]/div[1]/span[1]/div')
+
         image_url = image.value_of_css_property("background-image")
         raw_url = image_url.replace('url("', '').replace('")', '')
         # get webp
         # convert webp --> png
         resp = requests.get(raw_url)
         im = Image.open(BytesIO(resp.content)).convert("RGB")
-        im.save(filename, "png")
+        # im.save('train_images/{}'.format(filename), "png")
+        return im, filename
+
+    def train_image_save(self):
+        im, filename = self.take_screenshot()
+        im.save('train_images/{}'.format(filename), "png")
+
+    def match_image_save(self):
+        im, filename = self.take_screenshot()
+        im.save('matches_images/{}'.format(filename), "png")
 
     def auto_swipe(self):
         irand = randrange(2, 5)
@@ -91,7 +104,6 @@ class TinderBot():
                 if rand > .1:
                     sleep(irand)
                     self.like()
-                    self.take_screenshot()
                     right += 1
                     print('{}th right swipe'.format(right))
                 else:
@@ -111,6 +123,7 @@ class TinderBot():
 
     def close_match(self):
         match_popup = self.driver.find_element_by_xpath('//*[@id="modal-manager-canvas"]/div/div/div[1]/div/div[3]/a')
+        self.match_image_save()
         match_popup.click()
 
     def message_all(self):
@@ -142,5 +155,5 @@ class TinderBot():
 
 bot = TinderBot()
 bot.login()
-bot.auto_swipe()
+# bot.auto_swipe()
 # bot.message_all()

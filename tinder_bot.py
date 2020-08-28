@@ -59,13 +59,14 @@ class TinderBot():
         like_btn = self.driver.find_element_by_xpath(
             '//*[@id="content"]/div/div[1]/div/main/div[1]/div/div/div[1]/div/div[2]/div[4]/button'
         )
-        self.train_image_save()
+        self.like_image_save()
         like_btn.click()
 
     def dislike(self):
         dislike_btn = self.driver.find_element_by_xpath(
             '//*[@id="content"]/div/div[1]/div/main/div[1]/div/div/div[1]/div/div[2]/div[2]/button'
         )
+        self.disike_image_save()
         dislike_btn.click()
 
     def get_random_string(self):
@@ -83,16 +84,20 @@ class TinderBot():
         # convert webp --> png
         resp = requests.get(raw_url)
         im = Image.open(BytesIO(resp.content)).convert("RGB")
-        # im.save('train_images/{}'.format(filename), "png")
+        # im.save('like_images/{}'.format(filename), "png")
         return im, filename
 
-    def train_image_save(self):
+    def like_image_save(self):
         im, filename = self.take_screenshot()
-        im.save('train_images/{}'.format(filename), "png")
+        im.save('images/like_images/{}'.format(filename), "png")
+
+    def disike_image_save(self):
+        im, filename = self.take_screenshot()
+        im.save('images/dislike_images/{}'.format(filename), "png")
 
     def match_image_save(self):
         im, filename = self.take_screenshot()
-        im.save('matches_images/{}'.format(filename), "png")
+        im.save('images/matches_images/{}'.format(filename), "png")
 
     def auto_swipe(self):
         irand = randrange(2, 5)

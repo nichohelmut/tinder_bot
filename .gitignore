@@ -2,4 +2,8 @@
 venv/*
 secrets.py
  __pycache__/*
-/train_images/
+/images/like_images/
+/pytorch/training_data.npy
+/pytorch/.ipynb_checkpoints/
+/pytorch/model.log
+/images/
